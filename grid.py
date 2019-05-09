@@ -1,4 +1,5 @@
 import random
+import collections
 
 class Cell:
     x = 0
@@ -23,29 +24,31 @@ class GeneratePath:
     starting_node = None
     max_route_length = 8
     feasible_paths = []
+    grid_size = 5
 
 
 
     def init_grid(self):
-        for i in range(5):
+        for i in range(self.grid_size):
             row = []
-            for j in range(5):
+            for j in range(self.grid_size):
                 row.append(Cell(i,j, random.randint(1,10)))
             self.grid.append(row)
 
     def generate_starting_point(self):
-        starting_x = random.randint(0,4)
-        starting_y = random.randint(0,4)
+        starting_x = random.randint(0,self.grid_size-1)
+        starting_y = random.randint(0,self.grid_size-1)
         self.starting_node = self.grid[starting_x][starting_y]
-        print("Starting Node ", self.starting_node)
+        #print("Starting Node ", self.starting_node)
 
     def generate_route(self, depth, node, parent_node, path):
         #if limit is reached and currentnode is starting node
         #add to feasible_paths and return
         if depth is self.max_route_length:
             if node is self.starting_node:
+              if not self.is_path_duplicate(path, self.feasible_paths):
                 self.feasible_paths.append(path)
-                print("in max depth", path)
+                #print("in max depth", path)
             return
 
         #foreach adjacent node not visited so far
@@ -78,9 +81,27 @@ class GeneratePath:
         except:
             print("Not valid cell")
 
+    def is_path_duplicate(self, path, feasible_paths):
+      for p in feasible_paths:
+        if(collections.Counter(p)== collections.Counter(path)):
+          return True
+      return False
+
+    def test(self):
+      cell1 = Cell(0,0,1)
+      cell2 = Cell(1,1,2)
+      cell3 = Cell(2,2,3)
+      cell4 = Cell(3,3,4)
+      path1 = [cell1,cell2, cell4, cell3]
+      path2 = [cell2, cell1, cell3, cell4]
+      return collections.Counter(path1)== collections.Counter(path2)
+
+
 if __name__ == '__main__':
     gp = GeneratePath()
     gp.init_grid()
     gp.generate_starting_point()
     gp.generate_route(0, gp.starting_node, None, [])
     print(gp.feasible_paths, "Feasible Paths ", len(gp.feasible_paths))
+    print("Feasible Paths ", len(gp.feasible_paths))
+    
