@@ -52,13 +52,12 @@ class GeneratePaths:
         node.has_been_visited = True
         path.append(node)
         
-        #if limit is reached and currentnode is starting node
-        #add to feasible_paths and return
-        if depth is self.max_route_length:
-            if node is self.starting_node:
-              if self.does_path_cover_same_cells(path, self.feasible_paths) is False:
+        #check if we have come to the starting node again
+        #this means that a route has been created
+        if self.does_starting_node_exist_twice_in_path(path):
+            if self.does_path_cover_same_cells(path, self.feasible_paths) is False:
                 self.feasible_paths.append(copy.deepcopy(path))
-        else:
+        elif depth < self.max_route_length:
             #get adjacent nodes that are not in the path being generated
             nodes_to_expand = self.get_nodes_to_expand(node, path)
             for next_node in nodes_to_expand:
@@ -96,16 +95,41 @@ class GeneratePaths:
         if collections.Counter(p) == collections.Counter(path):
           return True
       return False
-
-if __name__ == '__main__':
-    gp = GeneratePaths()
-    gp.init_grid()
     
-    gp.generate_starting_point()
-    print('starting node', gp.starting_node)
-    gp.generate_routes(0, gp.starting_node, [])
-    print('Num of feasible paths', len(gp.feasible_paths))
-    print("Feasible Paths ", gp.feasible_paths )
-    print('length of one path',len(gp.feasible_paths[0]))
+    def does_starting_node_exist_twice_in_path(self, path):
+        return path.count(self.starting_node) is 2
+    
+    def print_paths(self, paths):
+        if type(paths[0]) is list:
+            for path in paths:
+                self.print_paths(path)
+        else:
+            grid = []
+            for i in range(self.grid_size):
+                row = []
+                for j in range(self.grid_size):
+                    row.append('.')
+                grid.append(row)
+            for point in paths:
+                grid[point.x][point.y] = 'x'
+            output = ""
+            for i in range(self.grid_size):
+                row = ""
+                for j in range(self.grid_size):
+                    row += grid[i][j]
+                output = row + '\n'+ output
+            print(output+"\n")    
+                
+    
+        
+# if __name__ == '__main__':
+#     gp = GeneratePaths()
+#     gp.init_grid()
+#     
+#     gp.generate_starting_point()
+#     print('starting node', gp.starting_node)
+#     gp.generate_routes(0, gp.starting_node, [])
+#     print('Num of feasible paths', len(gp.feasible_paths))
+#     gp.print_paths(gp.feasible_paths)
    
     
